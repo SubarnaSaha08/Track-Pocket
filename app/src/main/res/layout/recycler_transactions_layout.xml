@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/white_rounded_rectangle_bg"
+    android:elevation="10dp"
+    android:layout_marginBottom="10dp"
+    android:layout_marginStart="20dp"
+    android:layout_marginEnd="20dp"
+    android:layout_height="wrap_content">
+    
+    <View
+        android:id="@+id/transaction_icon_bg"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:layout_marginStart="15dp"
+        android:elevation="10dp"
+        android:background="@drawable/transaction_icon_bg"
+        android:backgroundTint="@color/red"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <ImageView
+        android:id="@+id/transaction_icon"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:contentDescription="transaction_type_icon"
+        android:elevation="11dp"
+        app:layout_constraintEnd_toEndOf="@+id/transaction_icon_bg"
+        app:layout_constraintStart_toStartOf="@+id/transaction_icon_bg"
+        app:layout_constraintTop_toTopOf="@+id/transaction_icon_bg"
+        app:layout_constraintBottom_toBottomOf="@+id/transaction_icon_bg"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/transaction_category"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:text="Food"
+        android:textColor="@color/black"
+        android:elevation="10dp"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/transaction_icon_bg"
+        app:layout_constraintTop_toTopOf="@+id/transaction_icon_bg"
+        app:layout_constraintBottom_toBottomOf="@+id/transaction_icon_bg"/>
+
+    <TextView
+        android:id="@+id/currency"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BDT "
+        android:elevation="10dp"
+        android:textColor="@color/black"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/transaction_amount"
+        app:layout_constraintTop_toTopOf="@+id/transaction_icon_bg" />
+
+    <TextView
+        android:id="@+id/transaction_amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="15dp"
+        android:text="200"
+        android:textColor="@color/black"
+        android:elevation="10dp"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/transaction_icon_bg" />
+
+    <TextView
+        android:id="@+id/transaction_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="15dp"
+        android:text="10/7/2024"
+        android:textColor="@color/black"
+        android:elevation="10dp"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/transaction_amount" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

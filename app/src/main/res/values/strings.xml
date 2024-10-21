@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">TrackPocket</string>
+    <string name="action_go">Go</string>
+    <string name="scan_bill_title">Scan bill with Gemini</string>
+    <string name="label_prompt">Prompt</string>
+    <string name="prompt_placeholder">Write down the information found in the picture</string>
+    <string name="image1_description">Cupcake</string>
+    <string name="image2_description">Cookies</string>
+    <string name="image3_description">Cake</string>
+    <string name="results_placeholder">(Results will appear here)</string>
+
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+    <string name="nav_drawer_open">Open navigation drawer</string>
+    <string name="nav_drawer_close">Close navigation drawer</string>
+
+
+    <string name="title_activity_registration">RegistrationActivity</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string-array name="transaction_categories">
+        <item>Food</item>
+        <item>Cloths</item>
+        <item>Education</item>
+        <item>Pet</item>
+        <item>Medical treatment</item>
+    </string-array>
+
+</resources>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1078630079079",
+    "project_id": "expensemanager-cc64b",
+    "storage_bucket": "expensemanager-cc64b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1078630079079:android:b589aaaf3ef32759eb92c2",
+        "android_client_info": {
+          "package_name": "com.example.trackpocket"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJI4yeiFAmy6GkZh747DaPpju5F2G8PDs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
