@@ -96,6 +96,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
             return;
         }
+        if (itemId == R.id.edit_profile_icon) {
+            startActivity(new Intent(getApplicationContext(), EditProfileActivity.class));
+            return;
+        }
         if (fragment != null) {
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ft.replace(R.id.main_frame, fragment);

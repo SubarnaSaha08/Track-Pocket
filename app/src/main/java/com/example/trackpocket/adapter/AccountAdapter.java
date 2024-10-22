@@ -7,7 +7,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.expensemanager.Model.Account;
+import com.example.trackpocket.Model.Account;
 import com.example.trackpocket.R;
 
 import java.util.List;
@@ -25,7 +25,7 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.account_layout, parent, false); // Change item_layout to your item layout file
+                .inflate(R.layout.recycler_account_layout, parent, false); // Change item_layout to your item layout file
         return new ViewHolder(view);
     }
 

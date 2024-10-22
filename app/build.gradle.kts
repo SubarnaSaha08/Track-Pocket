@@ -74,6 +74,7 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.androidx.activity.compose.v140)
     implementation(libs.ui)
+    implementation(libs.androidx.activity)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

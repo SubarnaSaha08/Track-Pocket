@@ -24,6 +24,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.trackpocket.Model.Account;
 import com.example.trackpocket.Model.Transaction;
 import com.example.trackpocket.adapter.AccountAdapter;
 import com.example.trackpocket.adapter.TransactionAdapter;
@@ -46,11 +47,13 @@ public class DashboardFragment extends Fragment {
     private FloatingActionButton floatingActionButton;
     private FirebaseAuth mAuth;
     private FirebaseDatabase database;
-    private DatabaseReference mTransactionDatabase;
+    private DatabaseReference mTransactionDatabase, mAccountDatabase;
     private EditText editDate;
     private RecyclerView tRecyclerView,accountRecyclerView;
     private AccountAdapter adapter;
     private TransactionAdapter tAdapter;
+    private View addAccount;
+    private boolean isDataLoaded = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -62,7 +65,9 @@ public class DashboardFragment extends Fragment {
 
         database = FirebaseDatabase.getInstance("https://expensemanager-cc64b-default-rtdb.asia-southeast1.firebasedatabase.app/");
         mTransactionDatabase = database.getReference().child("TransactionData").child(uid);
+        mAccountDatabase = database.getReference().child("AccountData").child(uid);
 
+        addAccount = myView.findViewById((R.id.add_account));
 //        floatingActionButton = myView.findViewById(R.id.floating_button);
         List<Transaction> tList = new ArrayList<>();
         tList.add(new Transaction(150.75, "Food", "txn_001", "Dinner at restaurant", "2024-10-07", "Expense"));
@@ -81,16 +86,15 @@ public class DashboardFragment extends Fragment {
 //        addTransactionView();
 
 //        Account RECYCLER PART
-//        List<Account> accountList = new ArrayList<>();
-//        accountList.add(new Account("Cash", 4200.00));
-//        accountList.add(new Account("Receivable", 3000.00));
-//
-//        accountRecyclerView = myView.findViewById(R.id.recycler_accounts);
-//        GridLayoutManager accountLayoutManager = new GridLayoutManager(getContext(), 2);
-//        accountRecyclerView.setLayoutManager(accountLayoutManager);
-//
-//        adapter = new AccountAdapter(accountList);
-//        accountRecyclerView.setAdapter(adapter);
+        accountRecyclerView = myView.findViewById(R.id.accounts_recycler);
+        LinearLayoutManager layoutManagerAccount = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
+        layoutManagerAccount.setStackFromEnd(true);
+        layoutManagerAccount.setReverseLayout(true);
+        accountRecyclerView.setHasFixedSize(true);
+        accountRecyclerView.setLayoutManager(layoutManagerAccount);
+
+
+        addAccountView();
         return myView;
     }
 
@@ -98,30 +102,57 @@ public class DashboardFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        FirebaseRecyclerOptions<Transaction> options =
-                new FirebaseRecyclerOptions.Builder<Transaction>()
-                        .setQuery(mTransactionDatabase, Transaction.class)
+        FirebaseRecyclerOptions<Account> options =
+                new FirebaseRecyclerOptions.Builder<Account>()
+                        .setQuery(mAccountDatabase, Account.class)
                         .build();
 
-        FirebaseRecyclerAdapter<Transaction, MyViewHolder> adapter = new FirebaseRecyclerAdapter<Transaction, MyViewHolder>(options) {
-            @Override
-            protected void onBindViewHolder(@NonNull MyViewHolder holder, int position, @NonNull Transaction model) {
-                // Bind your data here
-                // For example:
-                // holder.textView.setText(model.getSomeField());
-            }
+        FirebaseRecyclerAdapter<Account, AccountViewHolder> accountAdapter =
+                new FirebaseRecyclerAdapter<Account, AccountViewHolder>(options) {
 
-            @NonNull
-            @Override
-            public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                // Inflate your layout here and return the ViewHolder
-                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_transactions_layout, parent, false);
-                return new MyViewHolder(view);
-            }
-        };
+                    @Override
+                    protected void onBindViewHolder(@NonNull AccountViewHolder holder, int position, @NonNull Account model) {
+                        holder.setTitle(model.getTitle());
+                        holder.setBalance(model.getBalance());
+                    }
 
+                    @NonNull
+                    @Override
+                    public AccountViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                        // Inflate the item layout and create an instance of AccountViewHolder
+                        View view = LayoutInflater.from(parent.getContext())
+                                .inflate(R.layout.recycler_account_layout, parent, false);
+                        return new AccountViewHolder(view);
+                    }
+                };
+        accountRecyclerView.setAdapter(accountAdapter);
+        accountAdapter.startListening();
+    }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        // Stop listening when the fragment is stopped
+        if (accountRecyclerView.getAdapter() != null) {
+            ((FirebaseRecyclerAdapter) accountRecyclerView.getAdapter()).stopListening();
+        }
+    }
 
+    public static class AccountViewHolder extends RecyclerView.ViewHolder{
+        View accountView;
+        public AccountViewHolder(View itemView){
+            super(itemView);
+            accountView = itemView;
+        }
+        private void setTitle(String title){
+            TextView accountTitle = accountView.findViewById(R.id.account_title);
+            accountTitle.setText(title);
+        }
+        private void setBalance(Double balance){
+            TextView accountBalance = accountView.findViewById(R.id.total_account_balance);
+            String  balanceString =  String.valueOf( balance);
+            accountBalance.setText(balanceString);
+        }
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder{
@@ -154,6 +185,70 @@ public class DashboardFragment extends Fragment {
             }
             tAmount.setText(amountString);
         }
+    }
+
+    private void addAccountView(){
+        addAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                accountDataInsert();
+            }
+        });
+    }
+
+    public void accountDataInsert(){
+        AlertDialog.Builder accountDialog = new AlertDialog.Builder(getActivity());
+        LayoutInflater accountInflater = LayoutInflater.from(getActivity());
+        View tView = accountInflater.inflate(R.layout.account_addition_layout, null);
+        accountDialog.setView(tView);
+        AlertDialog dialog = accountDialog.create();
+
+        EditText editTitle = tView.findViewById(R.id.edit_account_title);
+        EditText editInitialBalance = tView.findViewById(R.id.edit_initial_balance);
+
+        Button btnSave = tView.findViewById(R.id.btn_account_save);
+        Button btnCancel = tView.findViewById(R.id.btn_account_cancel);
+
+        btnSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String title = editTitle.getText().toString().trim();
+                String initialBalance = editInitialBalance.getText().toString().trim();
+
+
+                if(TextUtils.isEmpty(title)){
+                    editTitle.setError("Title is required!!");
+                    return;
+                }
+                if(TextUtils.isEmpty(initialBalance)){
+                    editInitialBalance.setError("Initial balance is required!!");
+                    return;
+                }
+                double dInitialBalance = Double.parseDouble(initialBalance);
+
+                String accountId = mAccountDatabase.push().getKey();
+                Account aData = new Account(title, dInitialBalance);
+                mAccountDatabase.child(accountId).setValue(aData).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(getContext(), "Account saved successfully", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getContext(), "Failed to create account", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+                dialog.dismiss();
+            }
+        });
+
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
     }
 
     private void addTransactionView(){
