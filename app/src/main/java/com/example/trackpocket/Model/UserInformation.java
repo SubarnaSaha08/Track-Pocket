@@ -1,9 +1,12 @@
 package com.example.trackpocket.Model;
 
+import android.net.Uri;
+
 public class UserInformation {
+
+    private String userId;
     private String name;
     private String phoneNumber;
-    private String profilePictureUrl;
     private String createdAt;
     private String updatedAt;
 
@@ -11,11 +14,11 @@ public class UserInformation {
     }
 
     // Constructor with parameters
-    public UserInformation(String name, String phoneNumber,
-                           String profilePictureUrl, String createdAt, String updatedAt) {
+    public UserInformation(String userId, String name, String phoneNumber,
+                           String createdAt, String updatedAt) {
+        this.userId = userId;
         this.name = name;
         this.phoneNumber = phoneNumber;
-        this.profilePictureUrl = profilePictureUrl;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -25,10 +28,18 @@ public class UserInformation {
         return name;
     }
 
+    public void setUserId(String uid) {
+        this.userId = uid;
+    }
+
+
+    public String getUserId() {
+        return userId;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
-
 
     public String getPhoneNumber() {
         return phoneNumber;
@@ -36,14 +47,6 @@ public class UserInformation {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
-    }
-
-    public String getProfilePictureUrl() {
-        return profilePictureUrl;
-    }
-
-    public void setProfilePictureUrl(String profilePictureUrl) {
-        this.profilePictureUrl = profilePictureUrl;
     }
 
     public String getCreatedAt() {

@@ -2,17 +2,15 @@ package com.example.trackpocket.Model;
 
 public class Transaction {
     private double amount;
-    private String category;
     private String id;
-    private String note;
+    private String description;
     private String date;
     private String type;
 
-    public Transaction(double amount, String category, String id, String note, String date, String type) {
+    public Transaction(double amount,String description, String id, String date, String type) {
         this.amount = amount;
-        this.category = category;
         this.id = id;
-        this.note = note;
+        this.description = description;
         this.date = date;
         this.type = type;
     }
@@ -25,16 +23,12 @@ public class Transaction {
         return amount;
     }
 
-    public String getCategory() {
-        return category;
-    }
-
     public String getId() {
         return id;
     }
 
-    public String getNote() {
-        return note;
+    public String getDescription() {
+        return description;
     }
 
     public String getDate() {
@@ -49,16 +43,12 @@ public class Transaction {
         this.amount = amount;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
     public void setId(String id) {
         this.id = id;
     }
 
-    public void setNote(String note) {
-        this.note = note;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public void setDate(String date) {

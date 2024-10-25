@@ -67,6 +67,9 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
 
+    implementation(libs.github.glide)
+    implementation(libs.firebase.crashlytics.buildtools)
+    annotationProcessor(libs.glide.compiler)
     implementation(libs.firebase.ui.database)
     implementation(libs.firebase.database)
     implementation(libs.androidx.recyclerview)
@@ -75,6 +78,7 @@ dependencies {
     implementation(libs.androidx.activity.compose.v140)
     implementation(libs.ui)
     implementation(libs.androidx.activity)
+    implementation(libs.firebase.storage)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

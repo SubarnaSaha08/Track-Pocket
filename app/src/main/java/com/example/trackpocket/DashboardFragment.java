@@ -2,6 +2,7 @@ package com.example.trackpocket;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.icu.util.Calendar;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -70,8 +71,8 @@ public class DashboardFragment extends Fragment {
         addAccount = myView.findViewById((R.id.add_account));
 //        floatingActionButton = myView.findViewById(R.id.floating_button);
         List<Transaction> tList = new ArrayList<>();
-        tList.add(new Transaction(150.75, "Food", "txn_001", "Dinner at restaurant", "2024-10-07", "Expense"));
-        tList.add(new Transaction(3000.45, "Salary", "txn_002", "Got salary from job", "2024-10-01", "Income"));
+        tList.add(new Transaction(150.75, "Food", "txn_001", "2024-10-07", "Expense"));
+        tList.add(new Transaction(3000.45, "Salary", "txn_002", "2024-10-01", "Income"));
 
         tRecyclerView = myView.findViewById(R.id.recycler_id_transaction);
         tRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -83,16 +84,14 @@ public class DashboardFragment extends Fragment {
 //        layoutManager.setStackFromEnd(true);
 //        tRecyclerView.setHasFixedSize(true);
 //        tRecyclerView.setLayoutManager(layoutManager);
-//        addTransactionView();
 
-//        Account RECYCLER PART
+//      Account RECYCLER PART
         accountRecyclerView = myView.findViewById(R.id.accounts_recycler);
         LinearLayoutManager layoutManagerAccount = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
         layoutManagerAccount.setStackFromEnd(true);
         layoutManagerAccount.setReverseLayout(true);
         accountRecyclerView.setHasFixedSize(true);
         accountRecyclerView.setLayoutManager(layoutManagerAccount);
-
 
         addAccountView();
         return myView;
@@ -114,6 +113,16 @@ public class DashboardFragment extends Fragment {
                     protected void onBindViewHolder(@NonNull AccountViewHolder holder, int position, @NonNull Account model) {
                         holder.setTitle(model.getTitle());
                         holder.setBalance(model.getBalance());
+                        String accountId = getSnapshots().getSnapshot(position).getKey();
+
+                        holder.itemView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(v.getContext(), AccountDetailActivity.class);
+                                intent.putExtra("ACCOUNT_ID", accountId);
+                                v.getContext().startActivity(intent);
+                            }
+                        });
                     }
 
                     @NonNull
@@ -251,118 +260,4 @@ public class DashboardFragment extends Fragment {
         dialog.show();
     }
 
-    private void addTransactionView(){
-        floatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                transactionDataInsert();
-            }
-        });
-    }
-
-    public void transactionDataInsert(){
-        AlertDialog.Builder transactionDialog = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = LayoutInflater.from(getActivity());
-        View tView = inflater.inflate(R.layout.insertion_layout, null);
-        transactionDialog.setView(tView);
-        AlertDialog dialog = transactionDialog.create();
-
-        EditText editAmount = tView.findViewById(R.id.edit_amount);
-        RadioGroup radioGroupType = tView.findViewById(R.id.radio_group_transaction_type);
-        final String[] selectedTransactionType = {""};
-        AutoCompleteTextView editTransactionCat = tView.findViewById(R.id.edit_transaction_category);
-        EditText editNote = tView.findViewById(R.id.edit_note);
-        editDate = tView.findViewById(R.id.edit_date);
-        editDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDatePickerDialog();
-            }
-        });
-
-        Button btnSave = tView.findViewById(R.id.btn_transaction_save);
-        Button btnCancel = tView.findViewById(R.id.btn_transaction_cancel);
-
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(requireContext(), R.array.transaction_categories, android.R.layout.simple_dropdown_item_1line);
-        editTransactionCat.setAdapter(adapter);
-
-        radioGroupType.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                RadioButton selectedRadioButton = tView.findViewById(checkedId);
-                selectedTransactionType[0] = selectedRadioButton.getText().toString();
-            }
-        });
-
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String category = editTransactionCat.getText().toString().trim();
-                String amount = editAmount.getText().toString().trim();
-                String type = selectedTransactionType[0].trim();
-                String note = editNote.getText().toString().trim();
-                String date = editDate.getText().toString().trim();
-
-                int selectedId = radioGroupType.getCheckedRadioButtonId();
-                if (selectedId == -1) {
-                    Toast.makeText(getContext(), "Type is required!!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if(TextUtils.isEmpty(amount)){
-                    editAmount.setError("Amount is required!!");
-                    return;
-                }
-                double dAmount = Double.parseDouble(amount);
-                if(TextUtils.isEmpty(category)){
-                    editTransactionCat.setError("Category is required!!");
-                }
-                if(TextUtils.isEmpty(category)){
-                    editDate.setError("Date is required!!");
-                }
-
-                String id = mTransactionDatabase.push().getKey();
-                Transaction tData = new Transaction(dAmount,category, id, note, date, type);
-                mTransactionDatabase.child(id).setValue(tData).addOnCompleteListener(new OnCompleteListener<Void>() {
-                      @Override
-                      public void onComplete(@NonNull Task<Void> task) {
-                          if (task.isSuccessful()) {
-                              Toast.makeText(getContext(), "Transaction data saved successfully", Toast.LENGTH_SHORT).show();
-                          } else {
-                              Toast.makeText(getContext(), "Failed to save transaction data", Toast.LENGTH_SHORT).show();
-                          }
-                      }
-                  });
-                dialog.dismiss();
-            }
-        });
-
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-        dialog.show();
-    }
-
-    private void showDatePickerDialog() {
-        final Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-                getContext(),
-                new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                        if (editDate != null) {
-                            String dateText = dayOfMonth + "/" + (month + 1) + "/" + year;
-                            editDate.setText(dateText);
-                        }
-                    }
-                },
-                year, month, day);
-        datePickerDialog.show();
-    }
 }

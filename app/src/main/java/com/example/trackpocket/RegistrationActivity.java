@@ -65,7 +65,7 @@ public class RegistrationActivity extends AppCompatActivity {
                         if(task.isSuccessful()){
                             mDialog.dismiss();
                             Toast.makeText(getApplicationContext(), "Registration completeted..", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(getApplicationContext(), HomeActivity.class));
+                            startActivity(new Intent(getApplicationContext(), EditProfileActivity.class));
                         }else{
                             mDialog.dismiss();
                             Toast.makeText(getApplicationContext(), "Registration failed!!", Toast.LENGTH_SHORT).show();

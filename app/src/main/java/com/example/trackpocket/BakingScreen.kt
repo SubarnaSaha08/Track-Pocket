@@ -1,3 +1,4 @@
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -5,6 +6,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -13,24 +16,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.trackpocket.ScannerViewModel
+import com.example.trackpocket.BakingViewModel
 import com.example.trackpocket.R
 import com.example.trackpocket.UiState
 
 @Composable
 fun BakingScreen(
-    scannerViewModel: ScannerViewModel = viewModel()
+    bakingViewModel: BakingViewModel = viewModel()
 ) {
     val selectedImage = remember { mutableStateOf<Bitmap?>(null) }
     val placeholderPrompt = stringResource(R.string.prompt_placeholder)
     val placeholderResult = stringResource(R.string.results_placeholder)
     var prompt by rememberSaveable { mutableStateOf(placeholderPrompt) }
     var result by rememberSaveable { mutableStateOf(placeholderResult) }
-    val uiState by scannerViewModel.uiState.collectAsState()
+    val uiState by bakingViewModel.uiState.collectAsState()
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
@@ -93,7 +97,7 @@ fun BakingScreen(
                     Button(
                         onClick = {
                             selectedImage.value?.let { bitmap ->
-                                scannerViewModel.sendPrompt(bitmap, prompt)
+                                bakingViewModel.sendPrompt(bitmap, prompt)
                             }
                         },
                         enabled = prompt.isNotEmpty() && selectedImage.value != null,

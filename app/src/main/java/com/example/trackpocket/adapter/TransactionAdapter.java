@@ -35,7 +35,6 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Transaction transaction = transactionList.get(position);
         holder.amountTextView.setText(String.format("%.2f", transaction.getAmount())); // Formatting the amount
-        holder.categoryTextView.setText(transaction.getCategory());
         holder.dateTextView.setText(transaction.getDate());
 
         // Change the background color based on the transaction type
