@@ -1,6 +1,6 @@
 package com.example.trackpocket
 
-import BakingScreen
+import ScannerScreen
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -24,12 +24,11 @@ class ScanBillFragment : Fragment() {
             setContent {
                 // Use the TrackPocketTheme composable here
                 TrackPocketTheme {
-                    // A surface container using the 'background' color from the theme
                     Surface(
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background,
                     ) {
-                        BakingScreen() // Call your Composable function here
+                        ScannerScreen()
                     }
                 }
             }

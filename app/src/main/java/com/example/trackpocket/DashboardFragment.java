@@ -3,7 +3,9 @@ package com.example.trackpocket;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.icu.util.Calendar;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -14,12 +16,14 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -27,8 +31,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.trackpocket.Model.Account;
 import com.example.trackpocket.Model.Transaction;
-import com.example.trackpocket.adapter.AccountAdapter;
-import com.example.trackpocket.adapter.TransactionAdapter;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -39,6 +41,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -51,8 +55,6 @@ public class DashboardFragment extends Fragment {
     private DatabaseReference mTransactionDatabase, mAccountDatabase;
     private EditText editDate;
     private RecyclerView tRecyclerView,accountRecyclerView;
-    private AccountAdapter adapter;
-    private TransactionAdapter tAdapter;
     private View addAccount;
     private boolean isDataLoaded = false;
 
@@ -68,22 +70,13 @@ public class DashboardFragment extends Fragment {
         mTransactionDatabase = database.getReference().child("TransactionData").child(uid);
         mAccountDatabase = database.getReference().child("AccountData").child(uid);
 
-        addAccount = myView.findViewById((R.id.add_account));
-//        floatingActionButton = myView.findViewById(R.id.floating_button);
-        List<Transaction> tList = new ArrayList<>();
-        tList.add(new Transaction(150.75, "Food", "txn_001", "2024-10-07", "Expense"));
-        tList.add(new Transaction(3000.45, "Salary", "txn_002", "2024-10-01", "Income"));
-
-        tRecyclerView = myView.findViewById(R.id.recycler_id_transaction);
-        tRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-
-        tAdapter = new TransactionAdapter(tList);
-        tRecyclerView.setAdapter(tAdapter);
-//        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-//        layoutManager.setReverseLayout(true);
-//        layoutManager.setStackFromEnd(true);
-//        tRecyclerView.setHasFixedSize(true);
-//        tRecyclerView.setLayoutManager(layoutManager);
+//      Transaction RECYCLER PART
+        tRecyclerView = myView.findViewById(R.id.transactions_recycler);
+        LinearLayoutManager layoutManagerTransaction = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+        layoutManagerTransaction.setStackFromEnd(true);
+        layoutManagerTransaction.setReverseLayout(true);
+        tRecyclerView.setHasFixedSize(true);
+        tRecyclerView.setLayoutManager(layoutManagerTransaction);
 
 //      Account RECYCLER PART
         accountRecyclerView = myView.findViewById(R.id.accounts_recycler);
@@ -93,6 +86,7 @@ public class DashboardFragment extends Fragment {
         accountRecyclerView.setHasFixedSize(true);
         accountRecyclerView.setLayoutManager(layoutManagerAccount);
 
+        addAccount = myView.findViewById((R.id.add_account));
         addAccountView();
         return myView;
     }
@@ -101,13 +95,13 @@ public class DashboardFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        FirebaseRecyclerOptions<Account> options =
+        FirebaseRecyclerOptions<Account> options1 =
                 new FirebaseRecyclerOptions.Builder<Account>()
                         .setQuery(mAccountDatabase, Account.class)
                         .build();
 
         FirebaseRecyclerAdapter<Account, AccountViewHolder> accountAdapter =
-                new FirebaseRecyclerAdapter<Account, AccountViewHolder>(options) {
+                new FirebaseRecyclerAdapter<Account, AccountViewHolder>(options1) {
 
                     @Override
                     protected void onBindViewHolder(@NonNull AccountViewHolder holder, int position, @NonNull Account model) {
@@ -136,7 +130,38 @@ public class DashboardFragment extends Fragment {
                 };
         accountRecyclerView.setAdapter(accountAdapter);
         accountAdapter.startListening();
+
+        FirebaseRecyclerOptions<Transaction> options2 =
+                new FirebaseRecyclerOptions.Builder<Transaction>()
+                        .setQuery(mTransactionDatabase, Transaction.class)
+                        .build();
+
+        FirebaseRecyclerAdapter<Transaction, TransactionViewHolder> tAdapter =
+                new FirebaseRecyclerAdapter<Transaction, TransactionViewHolder>(options2) {
+
+                    @Override
+                    protected void onBindViewHolder(@NonNull TransactionViewHolder holder, int position, @NonNull Transaction model) {
+                        holder.setDescription(model.getDescription());
+                        holder.setAmount(model.getAmount());
+                        holder.setDate(model.getDate());
+                        holder.setAccountTitle(model.getAccountTitle());
+                        holder.setType(model.getType(), holder);
+                        String transactionId = getSnapshots().getSnapshot(position).getKey();
+                    }
+
+                    @NonNull
+                    @Override
+                    public TransactionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                        // Inflate the item layout and create an instance of AccountViewHolder
+                        View view = LayoutInflater.from(parent.getContext())
+                                .inflate(R.layout.recycler_transactions_layout, parent, false);
+                        return new TransactionViewHolder(view);
+                    }
+                };
+        tRecyclerView.setAdapter(tAdapter);
+        tAdapter.startListening();
     }
+
 
     @Override
     public void onStop() {
@@ -144,6 +169,10 @@ public class DashboardFragment extends Fragment {
         // Stop listening when the fragment is stopped
         if (accountRecyclerView.getAdapter() != null) {
             ((FirebaseRecyclerAdapter) accountRecyclerView.getAdapter()).stopListening();
+        }
+
+        if (tRecyclerView.getAdapter() != null) {
+            ((FirebaseRecyclerAdapter) tRecyclerView.getAdapter()).stopListening();
         }
     }
 
@@ -164,43 +193,69 @@ public class DashboardFragment extends Fragment {
         }
     }
 
-    public static class MyViewHolder extends RecyclerView.ViewHolder{
-        View tView;
+    public static class TransactionViewHolder extends RecyclerView.ViewHolder{
+        View transactionView;
+        private View iconBackground;
+        private ImageView transactionTypeIcon;
 
-        public MyViewHolder(View itemView){
+        public TransactionViewHolder(View itemView){
             super(itemView);
-            tView = itemView;
+            transactionView = itemView;
         }
 
-        private void setCategory(String category){
-            TextView tCategory = tView.findViewById(R.id.transaction_category);
-            tCategory.setText(category);
+        private void setDescription(String description){
+            TextView descriptionView = transactionView.findViewById(R.id.transaction_description);
+            descriptionView.setText(description);
         }
 
+        private void setAmount(Double amount){
+            TextView amountView = transactionView.findViewById(R.id.transaction_amount);
+            String  amountString =  String.valueOf( amount);
+            amountView.setText(amountString);
+        }
         private void setDate(String date){
-            TextView tDate = tView.findViewById(R.id.transaction_date);
-            tDate.setText(date);
+            TextView dateView = transactionView.findViewById(R.id.transaction_date);
+            dateView.setText(date);
         }
 
-        private void setAmount(Double amount, String type){
-            TextView tAmount = tView.findViewById(R.id.transaction_amount);
-            String amountString =  String.valueOf(amount);
-            if (type.equals("Income")) {
-                amountString = "+" + amountString + "tk";
-                tAmount.setTextColor(ContextCompat.getColor(tAmount.getContext(), R.color.green));
+        private void setAccountTitle(String accountTitle){
+            TextView accountTitleView = transactionView.findViewById(R.id.transaction_account);
+            accountTitleView.setText(accountTitle);
+        }
+
+        private void setType(String type, TransactionViewHolder holder){
+            iconBackground = transactionView.findViewById(R.id.transaction_icon_bg);
+            transactionTypeIcon = itemView.findViewById(R.id.transaction_icon);
+            if ("Income".equals(type)) {
+                holder.iconBackground.setBackgroundTintList(
+                        ColorStateList.valueOf(holder.iconBackground.getContext().getResources().getColor(R.color.green))
+                );
+                holder.transactionTypeIcon.setImageResource(R.drawable.arrow_down);
             } else {
-                amountString = "-" + amountString + "tk";
-                tAmount.setTextColor(ContextCompat.getColor(tAmount.getContext(), R.color.red));
+                holder.iconBackground.setBackgroundTintList(
+                        ColorStateList.valueOf(holder.iconBackground.getContext().getResources().getColor(R.color.red))
+                );
+                holder.transactionTypeIcon.setImageResource(R.drawable.arrow_up);
             }
-            tAmount.setText(amountString);
         }
     }
+
 
     private void addAccountView(){
         addAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 accountDataInsert();
+            }
+        });
+    }
+    public void insertInitialTransaction(double dAmount, String description, String date, String type, String tAccountId, String tAccountTitle ){
+        String id = mTransactionDatabase.push().getKey();
+        Transaction tData = new Transaction(dAmount, description, id,date, type, tAccountId, tAccountTitle);
+        mTransactionDatabase.child(id).setValue(tData).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                Toast.makeText(getContext(), "Account saved successfully", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -238,10 +293,13 @@ public class DashboardFragment extends Fragment {
                 String accountId = mAccountDatabase.push().getKey();
                 Account aData = new Account(title, dInitialBalance);
                 mAccountDatabase.child(accountId).setValue(aData).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @RequiresApi(api = Build.VERSION_CODES.O)
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            Toast.makeText(getContext(), "Account saved successfully", Toast.LENGTH_SHORT).show();
+                            LocalDate currentDate = LocalDate.now();
+                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                            insertInitialTransaction(dInitialBalance, "Initial Deposit", currentDate.format(formatter), "Income", accountId, title);
                         } else {
                             Toast.makeText(getContext(), "Failed to create account", Toast.LENGTH_SHORT).show();
                         }

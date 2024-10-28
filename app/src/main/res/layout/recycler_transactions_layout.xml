@@ -6,8 +6,6 @@
     android:background="@drawable/white_rounded_rectangle_bg"
     android:elevation="10dp"
     android:layout_marginBottom="10dp"
-    android:layout_marginStart="20dp"
-    android:layout_marginEnd="20dp"
     android:layout_height="wrap_content">
     
     <View
@@ -37,17 +35,28 @@
         tools:ignore="HardcodedText" />
 
     <TextView
-        android:id="@+id/transaction_category"
+        android:id="@+id/transaction_description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="15dp"
         android:text="Food"
         android:textColor="@color/black"
         android:elevation="10dp"
-        android:textSize="17sp"
+        android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/transaction_icon_bg"
-        app:layout_constraintTop_toTopOf="@+id/transaction_icon_bg"
+        app:layout_constraintTop_toTopOf="@+id/transaction_icon_bg" />
+
+    <TextView
+        android:id="@+id/transaction_account"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:text="Food"
+        android:textColor="@color/black"
+        android:elevation="10dp"
+        android:textSize="12sp"
+        app:layout_constraintStart_toEndOf="@+id/transaction_icon_bg"
         app:layout_constraintBottom_toBottomOf="@+id/transaction_icon_bg"/>
 
     <TextView

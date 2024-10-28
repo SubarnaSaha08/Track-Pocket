@@ -50,6 +50,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class AccountDetailActivity extends AppCompatActivity {
@@ -59,13 +61,15 @@ public class AccountDetailActivity extends AppCompatActivity {
     private DatabaseReference mAccountDatabase, mTransactionDatabase;
     private EditText editDate;
     private TextView accountTitleTextView, accountBalanceTextView;
+    private String accountId, accountTitle;
+    double accountBalance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_account_detail);
-        String accountId = getIntent().getStringExtra("ACCOUNT_ID");
+        accountId = getIntent().getStringExtra("ACCOUNT_ID");
 
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser mUser = mAuth.getCurrentUser();
@@ -74,7 +78,7 @@ public class AccountDetailActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance("https://expensemanager-cc64b-default-rtdb.asia-southeast1.firebasedatabase.app/");
         assert accountId != null;
         mAccountDatabase = database.getReference().child("AccountData").child(uid).child(accountId);
-        mTransactionDatabase = database.getReference().child("AccountData").child(uid).child(accountId).child("TransactionData");
+        mTransactionDatabase = database.getReference().child("TransactionData").child(uid);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -108,7 +112,8 @@ public class AccountDetailActivity extends AppCompatActivity {
                     if (dataSnapshot.exists()) {
                         Account account = dataSnapshot.getValue(Account.class);
                         if (account != null) {
-                            // Display account data
+                            accountBalance = account.getBalance();
+                            accountTitle = account.getTitle();
                             accountTitleTextView.setText(account.getTitle());
                             accountBalanceTextView.setText(String.format("BDT %s", account.getBalance()));
                         }
@@ -156,32 +161,34 @@ public class AccountDetailActivity extends AppCompatActivity {
                 String type = selectedTransactionType[0].trim();
                 String date = editDate.getText().toString().trim();
                 String description = editDescription.getText().toString().trim();
+                String tAccountId = accountId;
+                String tAccountTitle = accountTitle;
 
-
-                int selectedId = radioGroupType.getCheckedRadioButtonId();
-                if (selectedId == -1) {
-                    Toast.makeText(AccountDetailActivity.this, "Type is required!!", Toast.LENGTH_SHORT).show();
-                    return;
+                if(TextUtils.isEmpty(description)){
+                    editDate.setError("Description is required!!");
                 }
                 if(TextUtils.isEmpty(amount)){
                     editAmount.setError("Amount is required!!");
                     return;
                 }
-                double dAmount = Double.parseDouble(amount);
-                if(TextUtils.isEmpty(description)){
-                    editDate.setError("Description is required!!");
-                }
                 if(TextUtils.isEmpty(date)){
                     editDate.setError("Date is required!!");
                 }
+                double dAmount = Double.parseDouble(amount);
+                int selectedId = radioGroupType.getCheckedRadioButtonId();
+                if (selectedId == -1) {
+                    Toast.makeText(AccountDetailActivity.this, "Type is required!!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
 
                 String id = mTransactionDatabase.push().getKey();
-                Transaction tData = new Transaction(dAmount, description, id,date, type);
+                Transaction tData = new Transaction(dAmount, description, id,date, type, tAccountId, tAccountTitle);
                 mTransactionDatabase.child(id).setValue(tData).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            Toast.makeText(AccountDetailActivity.this, "Transaction data saved successfully", Toast.LENGTH_SHORT).show();
+                            updateAccountBalance(dAmount, type);
                         } else {
                             Toast.makeText(AccountDetailActivity.this, "Failed to save transaction data", Toast.LENGTH_SHORT).show();
                         }
@@ -199,6 +206,28 @@ public class AccountDetailActivity extends AppCompatActivity {
         });
     }
 
+    public void updateAccountBalance(double transactionAmount, String transactionType) {
+        double newAmount = accountBalance;
+        if(Objects.equals(transactionType, "Income"))
+        {
+            newAmount += transactionAmount;
+        }
+        else if(Objects.equals(transactionType, "Expense"))
+        {
+            newAmount -= transactionAmount;
+        }
+        mAccountDatabase.child("balance").setValue(newAmount).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(AccountDetailActivity.this, "Transaction data saved successfully", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(AccountDetailActivity.this, "Failed to save transaction data", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
     private void showDatePickerDialog() {
         final Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
@@ -206,7 +235,7 @@ public class AccountDetailActivity extends AppCompatActivity {
         int day = calendar.get(Calendar.DAY_OF_MONTH);
 
         DatePickerDialog datePickerDialog = new DatePickerDialog(
-                this, // Use 'this' to refer to the current Activity's context
+                this,
                 new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {

@@ -10,7 +10,7 @@
     <View
         android:id="@+id/parent_head"
         android:layout_width="match_parent"
-        android:layout_height="10dp"
+        android:layout_height="20dp"
         app:layout_constraintStart_toStartOf="parent"
         android:background="@color/bluish_purple"
         app:layout_constraintTop_toTopOf="parent"/>
