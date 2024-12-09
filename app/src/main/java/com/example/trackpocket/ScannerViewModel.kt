@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ScannerViewModel : ViewModel() {
     private val _uiState: MutableStateFlow<UiState> =
@@ -44,6 +45,21 @@ class ScannerViewModel : ViewModel() {
                 }
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.localizedMessage ?: "")
+            }
+        }
+    }
+
+    suspend fun getPromptResult(prompt: String): String {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = generativeModel.generateContent(
+                    content {
+                        text(prompt)
+                    }
+                )
+                response.text ?: throw Exception("No response text received")
+            } catch (e: Exception) {
+                throw Exception("Error generating content: ${e.localizedMessage}")
             }
         }
     }

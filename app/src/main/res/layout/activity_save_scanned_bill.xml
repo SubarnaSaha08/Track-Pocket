@@ -5,6 +5,186 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background_grey"
     tools:context=".SaveScannedBillActivity">
+    <View
+        android:id="@+id/parent_head"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        android:background="@color/bluish_purple"
+        app:layout_constraintTop_toTopOf="parent"/>
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/bluish_purple"
+        app:layout_constraintTop_toBottomOf="@+id/parent_head"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:title="Save Scanned Bill"
+        app:titleTextColor="@android:color/white" />
+
+    <View
+        android:id="@+id/add_transaction_card"
+        android:layout_width="match_parent"
+        android:layout_height="380dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginStart="15dp"
+        android:background="@drawable/add_transaction_card_background"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"/>
+
+    <TextView
+        android:id="@+id/save_transaction_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SAVE TRANSACTION"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:textColor="@color/bluish_purple"
+        android:layout_marginTop="15dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/add_transaction_card"/>
+
+    <Spinner
+        android:id="@+id/account_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:layout_marginStart="35dp"
+        android:layout_marginEnd="35dp"
+        android:layout_marginTop="20dp"
+        android:textAlignment="center"
+        android:textColorHint="@color/blue"
+        android:background="@drawable/white_rounded_rectangle_bg"
+        app:layout_constraintStart_toStartOf="@+id/add_transaction_card"
+        app:layout_constraintEnd_toEndOf="@+id/add_transaction_card"
+        app:layout_constraintTop_toBottomOf="@+id/save_transaction_title"/>
+
+    <EditText
+        android:id="@+id/edit_transaction_description"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginStart="35dp"
+        android:layout_marginEnd="35dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/white_rounded_rectangle_bg"
+        android:hint="Description"
+        android:textColor="@color/blue"
+        android:textColorHint="@color/blue"
+        android:textAlignment="center"
+        android:textSize="15sp"
+        android:inputType="text"
+        android:drawableStart="@drawable/edit_note_icon"
+        android:focusable="true"
+        android:clickable="true"
+        android:padding="7dp"
+        app:layout_constraintStart_toStartOf="@+id/add_transaction_card"
+        app:layout_constraintEnd_toEndOf="@+id/add_transaction_card"
+        app:layout_constraintTop_toBottomOf="@+id/account_spinner"
+        tools:ignore="HardcodedText" />
+
+    <EditText
+        android:id="@+id/edit_transaction_amount"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginStart="35dp"
+        android:layout_marginEnd="35dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/white_rounded_rectangle_bg"
+        android:hint="Amount"
+        android:textColor="@color/blue"
+        android:textColorHint="@color/blue"
+        android:textAlignment="center"
+        android:textSize="15sp"
+        android:inputType="number"
+        android:drawableStart="@drawable/currency_icon"
+        android:focusable="true"
+        android:clickable="true"
+        android:padding="7dp"
+        app:layout_constraintStart_toEndOf="@+id/add_transaction_card"
+        app:layout_constraintEnd_toEndOf="@+id/add_transaction_card"
+        app:layout_constraintTop_toBottomOf="@id/edit_transaction_description"
+        tools:ignore="HardcodedText" />
+
+    <EditText
+        android:id="@+id/edit_date"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginStart="35dp"
+        android:layout_marginEnd="35dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/white_rounded_rectangle_bg"
+        android:hint="Date"
+        android:textColor="@color/blue"
+        android:textColorHint="@color/blue"
+        android:textAlignment="center"
+        android:textSize="15sp"
+        android:inputType="date"
+        android:clickable="true"
+        android:drawableStart="@drawable/edit_calendar_icon"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:padding="7dp"
+        app:layout_constraintStart_toEndOf="@+id/add_transaction_card"
+        app:layout_constraintEnd_toEndOf="@+id/add_transaction_card"
+        app:layout_constraintTop_toBottomOf="@+id/edit_transaction_amount"
+        tools:ignore="HardcodedText" />
+
+    <RadioGroup
+        android:id="@+id/transaction_type_radio_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@+id/edit_date"
+        app:layout_constraintStart_toStartOf="@+id/add_transaction_card"
+        app:layout_constraintEnd_toEndOf="@+id/add_transaction_card">
+
+        <RadioButton
+            android:id="@+id/radio_income"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/blue"
+            android:buttonTint="@color/blue"
+            android:text="Income" />
+
+        <RadioButton
+            android:id="@+id/radio_expense"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/blue"
+            android:buttonTint="@color/blue"
+            android:text="Expense" />
+    </RadioGroup>
+
+
+    <Button
+        android:id="@+id/btn_transaction_cancel"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:layout_marginStart="35dp"
+        android:backgroundTint="@color/red"
+        android:text="Cancel"
+        android:textAppearance="?android:textAppearanceMedium"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/transaction_type_radio_group"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/btn_transaction_save"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:layout_marginEnd="35dp"
+        android:backgroundTint="@color/green"
+        android:text="Save"
+        android:textAppearance="?android:textAppearanceMedium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/transaction_type_radio_group"
+        tools:ignore="HardcodedText" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

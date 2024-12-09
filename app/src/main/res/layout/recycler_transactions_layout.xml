@@ -60,10 +60,11 @@
         app:layout_constraintBottom_toBottomOf="@+id/transaction_icon_bg"/>
 
     <TextView
-        android:id="@+id/currency"
+        android:id="@+id/currency_type"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="BDT "
+        android:layout_marginEnd="4dp"
+        android:text="BDT"
         android:elevation="10dp"
         android:textColor="@color/black"
         android:textSize="15sp"

@@ -5,6 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background_grey"
     tools:context=".AccountDetailActivity">
 
     <View
@@ -29,12 +30,12 @@
         android:id="@+id/account_info_card"
         android:layout_width="match_parent"
         android:layout_height="160dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
         android:layout_marginTop="20dp"
-        android:layout_marginEnd="15dp"
-        android:layout_marginStart="15dp"
         android:background="@drawable/account_info_card_background"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"/>
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
     <TextView
         android:id="@+id/account_title"
@@ -97,10 +98,10 @@
 
 
     <TextView
-        android:id="@+id/last_week_income"
+        android:id="@+id/last_week_income_ctype"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="BDT 0.00"
+        android:text="BDT"
         android:textStyle="bold"
         android:textSize="15sp"
         android:textColor="@color/white"
@@ -110,15 +111,41 @@
         app:layout_constraintBottom_toBottomOf="@+id/income_icon"/>
 
     <TextView
+        android:id="@+id/last_week_income"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0.00"
+        android:textStyle="bold"
+        android:textSize="15sp"
+        android:textColor="@color/white"
+        android:layout_marginStart="3dp"
+        app:layout_constraintStart_toEndOf="@+id/last_week_income_ctype"
+        app:layout_constraintTop_toTopOf="@+id/income_icon"
+        app:layout_constraintBottom_toBottomOf="@+id/income_icon"/>
+
+    <TextView
         android:id="@+id/last_week_expense"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="BDT 0.00"
+        android:text="0.00"
         android:textStyle="bold"
         android:textSize="15sp"
         android:textColor="@color/white"
         android:layout_marginEnd="3dp"
         app:layout_constraintEnd_toStartOf="@+id/expense_icon"
+        app:layout_constraintTop_toTopOf="@+id/expense_icon"
+        app:layout_constraintBottom_toBottomOf="@+id/expense_icon"/>
+
+    <TextView
+        android:id="@+id/last_week_expense_ctype"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BDT"
+        android:textStyle="bold"
+        android:textSize="15sp"
+        android:textColor="@color/white"
+        android:layout_marginEnd="3dp"
+        app:layout_constraintEnd_toStartOf="@+id/last_week_expense"
         app:layout_constraintTop_toTopOf="@+id/expense_icon"
         app:layout_constraintBottom_toBottomOf="@+id/expense_icon"/>
 
@@ -269,9 +296,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/transaction_type_radio_group"
         tools:ignore="HardcodedText" />
-
-
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

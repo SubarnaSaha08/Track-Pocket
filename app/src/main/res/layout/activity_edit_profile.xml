@@ -80,6 +80,20 @@
                 android:padding="15dp"
                 tools:ignore="HardcodedText" />
 
+            <Spinner
+                android:id="@+id/currency_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="49dp"
+                android:layout_gravity="center"
+                android:layout_marginStart="30dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginTop="15dp"
+                android:textAlignment="center"
+                android:textColorHint="@color/blue"
+                android:textColor="@color/blue"
+                android:entries="@array/CurrenciesArray"
+                android:background="@drawable/white_rounded_rectangle_bg" />
+
             <Button
                 android:id="@+id/btn_skip"
                 android:layout_width="match_parent"

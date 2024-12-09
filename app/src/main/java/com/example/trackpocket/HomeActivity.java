@@ -1,6 +1,7 @@
 package com.example.trackpocket;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -38,6 +39,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -80,7 +82,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
         bottomNavigationView = findViewById(R.id.bottomNavigationBar);
         frameLayout = findViewById(R.id.main_frame);
-
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawerLayout, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close

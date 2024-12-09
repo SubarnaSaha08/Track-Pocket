@@ -3,13 +3,11 @@
     <string name="action_go">Go</string>
     <string name="scan_bill_title">Scan bill with Gemini</string>
     <string name="label_prompt">Prompt</string>
-    <string name="prompt_placeholder">Extract the following information from the provided invoice image:\n
-        Item names\n
-        Item total bills\n
-        Subtotal bill\n
-        Date\n
-        If the invoice is organized in a table, look for the item name in the first column, the item total in the second, and the subtotal in the last row.
-        If the invoice is an itemized list, search for item names followed by their respective quantities and prices. Calculate the item total by multiplying quantity and price. The date is usually located in the header or footer. The subtotal or total is often found at the bottom of the invoice.
+    <string name="prompt_placeholder">Extract the following information strictly in the given format from the provided invoice image:\n
+        Description: Relevant description of the expense based on what is found in the bill in 3-4 words\n
+        Bill: Total bill only the amount without currency\n
+        Date: Date in DD/MM/YYYY format\n
+        Currency: Used currency from the options (e.g.: BDT, USD etc.)\n
     </string>
     <string name="image1_description">Cupcake</string>
     <string name="image2_description">Cookies</string>
@@ -23,16 +21,16 @@
     <string name="nav_drawer_open">Open navigation drawer</string>
     <string name="nav_drawer_close">Close navigation drawer</string>
 
-
     <string name="title_activity_registration">RegistrationActivity</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
-    <string-array name="transaction_categories">
-        <item>Food</item>
-        <item>Cloths</item>
-        <item>Education</item>
-        <item>Pet</item>
-        <item>Medical treatment</item>
+    <string-array name="CurrenciesArray">
+        <item>Select Currency type</item>
+        <item>USD</item>
+        <item>EUR</item>
+        <item>BDT</item>
+        <item>INR</item>
+        <item>GBP</item>
     </string-array>
 
 </resources>

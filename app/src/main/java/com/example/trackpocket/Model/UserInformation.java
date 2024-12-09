@@ -9,16 +9,18 @@ public class UserInformation {
     private String phoneNumber;
     private String createdAt;
     private String updatedAt;
+    private String currencyType;
 
     public UserInformation() {
     }
 
     // Constructor with parameters
-    public UserInformation(String userId, String name, String phoneNumber,
+    public UserInformation(String userId, String name, String phoneNumber, String currencyType,
                            String createdAt, String updatedAt) {
         this.userId = userId;
         this.name = name;
         this.phoneNumber = phoneNumber;
+        this.currencyType = currencyType;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -47,6 +49,14 @@ public class UserInformation {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getCurrencyType() {
+        return currencyType;
+    }
+
+    public void setCurrencyType(String currencyType) {
+        this.currencyType = currencyType;
     }
 
     public String getCreatedAt() {

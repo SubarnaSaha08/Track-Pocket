@@ -5,9 +5,11 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.icu.util.Calendar;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,17 +31,25 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.trackpocket.Model.Account;
 import com.example.trackpocket.Model.Transaction;
+import com.example.trackpocket.Model.UserInformation;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.StorageReference;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -52,11 +62,12 @@ public class DashboardFragment extends Fragment {
     private FloatingActionButton floatingActionButton;
     private FirebaseAuth mAuth;
     private FirebaseDatabase database;
-    private DatabaseReference mTransactionDatabase, mAccountDatabase;
+    private DatabaseReference mTransactionDatabase, mAccountDatabase, mUserDatabase;
     private EditText editDate;
     private RecyclerView tRecyclerView,accountRecyclerView;
     private View addAccount;
     private boolean isDataLoaded = false;
+    private String currencyType;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -68,6 +79,7 @@ public class DashboardFragment extends Fragment {
 
         database = FirebaseDatabase.getInstance("https://expensemanager-cc64b-default-rtdb.asia-southeast1.firebasedatabase.app/");
         mTransactionDatabase = database.getReference().child("TransactionData").child(uid);
+        mUserDatabase = database.getReference().child("UserData").child(uid);
         mAccountDatabase = database.getReference().child("AccountData").child(uid);
 
 //      Transaction RECYCLER PART
@@ -88,6 +100,7 @@ public class DashboardFragment extends Fragment {
 
         addAccount = myView.findViewById((R.id.add_account));
         addAccountView();
+        getCurrencyTypeFromDb();
         return myView;
     }
 
@@ -102,11 +115,13 @@ public class DashboardFragment extends Fragment {
 
         FirebaseRecyclerAdapter<Account, AccountViewHolder> accountAdapter =
                 new FirebaseRecyclerAdapter<Account, AccountViewHolder>(options1) {
-
                     @Override
                     protected void onBindViewHolder(@NonNull AccountViewHolder holder, int position, @NonNull Account model) {
+                        getCurrencyTypeFromDb();
                         holder.setTitle(model.getTitle());
                         holder.setBalance(model.getBalance());
+                        getCurrencyTypeFromDb();
+                        holder.setCurrencyType(currencyType);
                         String accountId = getSnapshots().getSnapshot(position).getKey();
 
                         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -114,6 +129,7 @@ public class DashboardFragment extends Fragment {
                             public void onClick(View v) {
                                 Intent intent = new Intent(v.getContext(), AccountDetailActivity.class);
                                 intent.putExtra("ACCOUNT_ID", accountId);
+                                intent.putExtra("CURRENCY_TYPE", currencyType);
                                 v.getContext().startActivity(intent);
                             }
                         });
@@ -123,13 +139,12 @@ public class DashboardFragment extends Fragment {
                     @Override
                     public AccountViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                         // Inflate the item layout and create an instance of AccountViewHolder
+                        getCurrencyTypeFromDb();
                         View view = LayoutInflater.from(parent.getContext())
                                 .inflate(R.layout.recycler_account_layout, parent, false);
                         return new AccountViewHolder(view);
                     }
                 };
-        accountRecyclerView.setAdapter(accountAdapter);
-        accountAdapter.startListening();
 
         FirebaseRecyclerOptions<Transaction> options2 =
                 new FirebaseRecyclerOptions.Builder<Transaction>()
@@ -144,6 +159,7 @@ public class DashboardFragment extends Fragment {
                         holder.setDescription(model.getDescription());
                         holder.setAmount(model.getAmount());
                         holder.setDate(model.getDate());
+                        holder.setCurrencyType(currencyType);
                         holder.setAccountTitle(model.getAccountTitle());
                         holder.setType(model.getType(), holder);
                         String transactionId = getSnapshots().getSnapshot(position).getKey();
@@ -158,8 +174,29 @@ public class DashboardFragment extends Fragment {
                         return new TransactionViewHolder(view);
                     }
                 };
+
+        accountRecyclerView.setAdapter(accountAdapter);
+        accountAdapter.startListening();
         tRecyclerView.setAdapter(tAdapter);
         tAdapter.startListening();
+    }
+
+    public void getCurrencyTypeFromDb(){
+        mUserDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    UserInformation userInfo = dataSnapshot.getValue(UserInformation.class);
+                    if (userInfo != null) {
+                        currencyType = userInfo.getCurrencyType();
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
 
@@ -182,6 +219,12 @@ public class DashboardFragment extends Fragment {
             super(itemView);
             accountView = itemView;
         }
+
+        private void setCurrencyType(String cType){
+            TextView cTypeView = accountView.findViewById(R.id.currency_type);
+            cTypeView.setText(cType);
+        }
+
         private void setTitle(String title){
             TextView accountTitle = accountView.findViewById(R.id.account_title);
             accountTitle.setText(title);
@@ -201,6 +244,11 @@ public class DashboardFragment extends Fragment {
         public TransactionViewHolder(View itemView){
             super(itemView);
             transactionView = itemView;
+        }
+
+        private void setCurrencyType(String cType){
+            TextView cTypeView = transactionView.findViewById(R.id.currency_type);
+            cTypeView.setText(cType);
         }
 
         private void setDescription(String description){

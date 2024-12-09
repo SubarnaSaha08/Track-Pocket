@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -41,6 +42,7 @@ public class EditProfileActivity extends AppCompatActivity {
     private ImageView userProfilePicture;
     private EditText userNameInput;
     private EditText userPhoneInput;
+    private Spinner currencyTypeSpinner;
     private Uri imageUri;
     private Button btnSkip;
     private Button btnSave;
@@ -63,6 +65,7 @@ public class EditProfileActivity extends AppCompatActivity {
         Button btnUploadImage = findViewById(R.id.btn_upload_image);
         userNameInput = findViewById(R.id.user_name);
         userPhoneInput = findViewById(R.id.user_phone_number);
+        currencyTypeSpinner = findViewById(R.id.currency_spinner);
         btnSkip = findViewById(R.id.btn_skip);
         btnSave = findViewById(R.id.btn_save);
 
@@ -92,6 +95,7 @@ public class EditProfileActivity extends AppCompatActivity {
     private void saveUserInfo(String uid) {
         String name = userNameInput.getText().toString().trim();
         String phoneNumber = userPhoneInput.getText().toString().trim();
+        String selectedCurrencyType = String.valueOf(currencyTypeSpinner.getSelectedItem());
 
         if (TextUtils.isEmpty(name)) {
             Toast.makeText(this, "Please enter your name", Toast.LENGTH_SHORT).show();
@@ -99,6 +103,10 @@ public class EditProfileActivity extends AppCompatActivity {
         }
         if (TextUtils.isEmpty(phoneNumber)) {
             Toast.makeText(this, "Please enter your phone number", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (TextUtils.isEmpty(selectedCurrencyType) || Objects.equals(selectedCurrencyType, "Select Currency type")) {
+            Toast.makeText(EditProfileActivity.this, "Currency type is required!!", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -110,7 +118,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
             fileReference.putFile(imageUri)
                     .addOnSuccessListener(taskSnapshot -> fileReference.getDownloadUrl().addOnSuccessListener(uri -> {
-                        UserInformation userInformation = new UserInformation(uid, name, phoneNumber, createdAt, updatedAt);
+                        UserInformation userInformation = new UserInformation(uid, name, phoneNumber, selectedCurrencyType, createdAt, updatedAt);
 
                         mUserDatabase.setValue(userInformation).addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
@@ -126,7 +134,7 @@ public class EditProfileActivity extends AppCompatActivity {
                     .addOnFailureListener(e -> Toast.makeText(EditProfileActivity.this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
         } else {
             // If no image was selected, still save user info without image URL
-            UserInformation userInformation = new UserInformation(uid, name, phoneNumber, createdAt, updatedAt);
+            UserInformation userInformation = new UserInformation(uid, name, phoneNumber, selectedCurrencyType, createdAt, updatedAt);
             mUserDatabase.setValue(userInformation).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     Toast.makeText(EditProfileActivity.this, "User information saved successfully!", Toast.LENGTH_SHORT).show();

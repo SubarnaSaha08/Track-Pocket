@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat;
 
 import com.example.trackpocket.Model.Account;
 import com.example.trackpocket.Model.Transaction;
+import com.example.trackpocket.Model.UserInformation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -30,6 +31,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -50,7 +52,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -58,11 +64,12 @@ public class AccountDetailActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private FirebaseDatabase database;
-    private DatabaseReference mAccountDatabase, mTransactionDatabase;
+    private DatabaseReference mAccountDatabase, mTransactionDatabase, mUserDatabase;
     private EditText editDate;
-    private TextView accountTitleTextView, accountBalanceTextView;
+    private TextView accountTitleTextView, accountBalanceTextView, incomeCurrencyTypeView, expenseCurrencyTypeView;
     private String accountId, accountTitle;
     double accountBalance;
+    private String currencyType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +77,7 @@ public class AccountDetailActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_account_detail);
         accountId = getIntent().getStringExtra("ACCOUNT_ID");
-
+        currencyType = getIntent().getStringExtra("CURRENCY_TYPE");
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser mUser = mAuth.getCurrentUser();
         String uid = Objects.requireNonNull(mUser).getUid();
@@ -78,6 +85,7 @@ public class AccountDetailActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance("https://expensemanager-cc64b-default-rtdb.asia-southeast1.firebasedatabase.app/");
         assert accountId != null;
         mAccountDatabase = database.getReference().child("AccountData").child(uid).child(accountId);
+        mUserDatabase = database.getReference().child("UserData").child(uid);
         mTransactionDatabase = database.getReference().child("TransactionData").child(uid);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -86,7 +94,6 @@ public class AccountDetailActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
-
         fetchAccountData(accountId);
 
         editDate = findViewById(R.id.edit_date);
@@ -94,6 +101,72 @@ public class AccountDetailActivity extends AppCompatActivity {
 
         transactionDataInsert();
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        mTransactionDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                double totalIncome = 0;
+                double totalExpense = 0;
+
+                Calendar today = Calendar.getInstance();
+                Calendar oneWeekAgo = Calendar.getInstance();
+                oneWeekAgo.add(Calendar.DAY_OF_YEAR, -7);
+
+                for (DataSnapshot transactionSnapshot : snapshot.getChildren()) {
+                    Transaction transaction = transactionSnapshot.getValue(Transaction.class);
+                    if (transaction != null) {
+                        if (isDateValid(today, oneWeekAgo,transaction.getDate())) {
+                            if ("income".equalsIgnoreCase(transaction.getType())) {
+                                totalIncome += transaction.getAmount();
+                            } else if ("expense".equalsIgnoreCase(transaction.getType())) {
+                                totalExpense += transaction.getAmount();
+                            }
+                        }
+                    }
+                }
+                TextView incomeTextView = findViewById(R.id.last_week_income);
+                TextView expenseTextView = findViewById(R.id.last_week_expense);
+
+                incomeTextView.setText(String.format(" %.2f", totalIncome));
+                expenseTextView.setText(String.format(" %.2f", totalExpense));
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(AccountDetailActivity.this, "Failed to load transactions.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public boolean isDateValid(Calendar end, Calendar start, String dateString) {
+
+
+        int day = Integer.parseInt(dateString.substring(0, 2));
+        int month = Integer.parseInt(dateString.substring(3, 5)) - 1;
+        int year = Integer.parseInt(dateString.substring(6, 10));
+
+        Calendar givenCalendar = Calendar.getInstance();
+        givenCalendar.set(Calendar.YEAR, year);
+        givenCalendar.set(Calendar.MONTH, month);
+        givenCalendar.set(Calendar.DAY_OF_MONTH, day);
+
+        return (givenCalendar.after(start) || isSameDay(givenCalendar, start)) &&
+                (givenCalendar.before(end) || isSameDay(givenCalendar, end));
+
+
+    }
+
+    public static boolean isSameDay(Calendar calendar1, Calendar calendar2) {
+        return calendar1.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR) &&
+                calendar1.get(Calendar.MONTH) == calendar2.get(Calendar.MONTH) &&
+                calendar1.get(Calendar.DAY_OF_MONTH) == calendar2.get(Calendar.DAY_OF_MONTH);
+    }
+
+
+
 
     @Override
     public boolean onSupportNavigateUp() {
@@ -105,6 +178,8 @@ public class AccountDetailActivity extends AppCompatActivity {
 
         accountTitleTextView = findViewById(R.id.account_title);
         accountBalanceTextView = findViewById(R.id.total_account_balance);
+        incomeCurrencyTypeView = findViewById(R.id.last_week_income_ctype);
+        expenseCurrencyTypeView = findViewById(R.id.last_week_expense_ctype);
         if (accountId != null) {
             mAccountDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -115,7 +190,9 @@ public class AccountDetailActivity extends AppCompatActivity {
                             accountBalance = account.getBalance();
                             accountTitle = account.getTitle();
                             accountTitleTextView.setText(account.getTitle());
-                            accountBalanceTextView.setText(String.format("BDT %s", account.getBalance()));
+                            accountBalanceTextView.setText(String.format(currencyType+" %s", account.getBalance()));
+                            expenseCurrencyTypeView.setText(currencyType);
+                            incomeCurrencyTypeView.setText(currencyType);
                         }
                     } else {
                         Toast.makeText(AccountDetailActivity.this, "Account not found.", Toast.LENGTH_SHORT).show();
