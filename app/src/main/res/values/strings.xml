@@ -33,4 +33,15 @@
         <item>GBP</item>
     </string-array>
 
+    <string-array name="CategoriesArray">
+        <item>Select Category</item>
+        <item>Income</item>
+        <item>Gift</item>
+        <item>Food</item>
+        <item>Entertainment</item>
+        <item>Transport</item>
+        <item>Education</item>
+        <item>Utility</item>
+    </string-array>
+
 </resources>

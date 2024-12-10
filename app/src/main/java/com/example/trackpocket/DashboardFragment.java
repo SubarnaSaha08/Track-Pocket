@@ -162,6 +162,7 @@ public class DashboardFragment extends Fragment {
                         holder.setCurrencyType(currencyType);
                         holder.setAccountTitle(model.getAccountTitle());
                         holder.setType(model.getType(), holder);
+                        holder.setCategory(model.getCategory(), holder);
                         String transactionId = getSnapshots().getSnapshot(position).getKey();
                     }
 
@@ -271,19 +272,35 @@ public class DashboardFragment extends Fragment {
             accountTitleView.setText(accountTitle);
         }
 
-        private void setType(String type, TransactionViewHolder holder){
+        private void setType(String type, TransactionViewHolder holder) {
             iconBackground = transactionView.findViewById(R.id.transaction_icon_bg);
             transactionTypeIcon = itemView.findViewById(R.id.transaction_icon);
-            if ("Income".equals(type)) {
+            if ("income".equalsIgnoreCase(type)) {
                 holder.iconBackground.setBackgroundTintList(
                         ColorStateList.valueOf(holder.iconBackground.getContext().getResources().getColor(R.color.green))
                 );
-                holder.transactionTypeIcon.setImageResource(R.drawable.arrow_down);
             } else {
                 holder.iconBackground.setBackgroundTintList(
                         ColorStateList.valueOf(holder.iconBackground.getContext().getResources().getColor(R.color.red))
                 );
-                holder.transactionTypeIcon.setImageResource(R.drawable.arrow_up);
+            }
+        }
+        private void setCategory(String category, TransactionViewHolder holder) {
+            transactionTypeIcon = itemView.findViewById(R.id.transaction_icon);
+            if ("Income".equalsIgnoreCase(category)) {
+                holder.transactionTypeIcon.setImageResource(R.drawable.arrow_down);
+            } else if("Gift".equalsIgnoreCase(category)){
+                holder.transactionTypeIcon.setImageResource(R.drawable.category_icon_gift);
+            } else if("Food".equalsIgnoreCase(category)){
+                holder.transactionTypeIcon.setImageResource(R.drawable.category_icon_food);
+            } else if("Study".equalsIgnoreCase(category)){
+                holder.transactionTypeIcon.setImageResource(R.drawable.category_icon_education);
+            } else if("Transport".equalsIgnoreCase(category)){
+                holder.transactionTypeIcon.setImageResource(R.drawable.category_icon_transport);
+            } else if("Utility".equalsIgnoreCase(category)){
+                holder.transactionTypeIcon.setImageResource(R.drawable.category_icon_utility);
+            } else if("Entertainment".equalsIgnoreCase(category)){
+                holder.transactionTypeIcon.setImageResource(R.drawable.category_icon_entertainment);
             }
         }
     }
@@ -297,9 +314,9 @@ public class DashboardFragment extends Fragment {
             }
         });
     }
-    public void insertInitialTransaction(double dAmount, String description, String date, String type, String tAccountId, String tAccountTitle ){
+    public void insertInitialTransaction(double dAmount, String description, String date, String type, String tAccountId, String tAccountTitle, String tCategory){
         String id = mTransactionDatabase.push().getKey();
-        Transaction tData = new Transaction(dAmount, description, id,date, type, tAccountId, tAccountTitle);
+        Transaction tData = new Transaction(dAmount, description, id,date, type, tAccountId, tAccountTitle, tCategory);
         mTransactionDatabase.child(id).setValue(tData).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -347,7 +364,7 @@ public class DashboardFragment extends Fragment {
                         if (task.isSuccessful()) {
                             LocalDate currentDate = LocalDate.now();
                             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-                            insertInitialTransaction(dInitialBalance, "Initial Deposit", currentDate.format(formatter), "Income", accountId, title);
+                            insertInitialTransaction(dInitialBalance, "Initial Deposit", currentDate.format(formatter), "Income", accountId, title, "Income");
                         } else {
                             Toast.makeText(getContext(), "Failed to create account", Toast.LENGTH_SHORT).show();
                         }

@@ -203,6 +203,7 @@ public class SaveScannedBillActivity extends AppCompatActivity {
         editAmount = findViewById(R.id.edit_transaction_amount);
         radioGroupType = findViewById(R.id.transaction_type_radio_group);
         editDate = findViewById(R.id.edit_date);
+        Spinner editCategory = findViewById(R.id.edit_category_spinner);
 
         Button btnSave = findViewById(R.id.btn_transaction_save);
         Button btnCancel = findViewById(R.id.btn_transaction_cancel);
@@ -222,6 +223,7 @@ public class SaveScannedBillActivity extends AppCompatActivity {
                 String type = selectedTransactionType[0].trim();
                 String date = editDate.getText().toString().trim();
                 String description = editDescription.getText().toString().trim();
+                String category = String.valueOf(editCategory.getSelectedItem());
 
                 if(TextUtils.isEmpty(description)){
                     editDate.setError("Description is required!!");
@@ -245,7 +247,7 @@ public class SaveScannedBillActivity extends AppCompatActivity {
                 }
 
                 String id = mTransactionDatabase.push().getKey();
-                Transaction tData = new Transaction(dAmount, description, id,date, type, selectedAccountId, selectedAccount);
+                Transaction tData = new Transaction(dAmount, description, id,date, type, selectedAccountId, selectedAccount, category);
                 mTransactionDatabase.child(id).setValue(tData).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {

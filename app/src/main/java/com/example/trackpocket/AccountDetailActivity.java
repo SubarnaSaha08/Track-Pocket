@@ -41,6 +41,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,8 +55,10 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -65,7 +68,7 @@ public class AccountDetailActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseDatabase database;
     private DatabaseReference mAccountDatabase, mTransactionDatabase, mUserDatabase;
-    private EditText editDate;
+    private EditText editDate, editReportStartDate, editReportEndDate;
     private TextView accountTitleTextView, accountBalanceTextView, incomeCurrencyTypeView, expenseCurrencyTypeView;
     private String accountId, accountTitle;
     double accountBalance;
@@ -97,9 +100,14 @@ public class AccountDetailActivity extends AppCompatActivity {
         fetchAccountData(accountId);
 
         editDate = findViewById(R.id.edit_date);
-        editDate.setOnClickListener(v -> showDatePickerDialog());
+        editDate.setOnClickListener(v -> showDatePickerDialog1());
+        editReportStartDate = findViewById(R.id.edit_report_start_date);
+        editReportStartDate.setOnClickListener(v -> showDatePickerDialog2());
+        editReportEndDate = findViewById(R.id.edit_report_end_date);
+        editReportEndDate.setOnClickListener(v -> showDatePickerDialog3());
 
         transactionDataInsert();
+        GenerateReport();
     }
 
     @Override
@@ -119,7 +127,7 @@ public class AccountDetailActivity extends AppCompatActivity {
                 for (DataSnapshot transactionSnapshot : snapshot.getChildren()) {
                     Transaction transaction = transactionSnapshot.getValue(Transaction.class);
                     if (transaction != null) {
-                        if (isDateValid(today, oneWeekAgo,transaction.getDate())) {
+                        if (Objects.equals(transaction.getAccountId(), accountId) && isDateValid(today, oneWeekAgo, convertDateString(transaction.getDate()))) {
                             if ("income".equalsIgnoreCase(transaction.getType())) {
                                 totalIncome += transaction.getAmount();
                             } else if ("expense".equalsIgnoreCase(transaction.getType())) {
@@ -141,32 +149,56 @@ public class AccountDetailActivity extends AppCompatActivity {
         });
     }
 
-    public boolean isDateValid(Calendar end, Calendar start, String dateString) {
+    public Calendar convertDateString(String dateString) {
+        int i = 0, j = 0;
+        for (int ind = 0; ind < dateString.length(); ind++) {
+            char c = dateString.charAt(ind);
+            j = ind;
+            if(c < '0' || c > '9'){
+                break;
+            }
+        }
+        int day = Integer.parseInt(dateString.substring(i, j));
+        i = j + 1;
+        for (int ind = i; ind < dateString.length(); ind++) {
+            char c = dateString.charAt(ind);
+            j = ind;
+            if(c < '0' || c > '9'){
+                break;
+            }
+        }
+        int month = Integer.parseInt(dateString.substring(i, j))- 1;
+        i = j + 1;
+        for (int ind = i; ind < dateString.length(); ind++) {
+            char c = dateString.charAt(ind);
+            j = ind;
+        }
+        int year = Integer.parseInt(dateString.substring(i, j+1));
 
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, year);
+        calendar.set(Calendar.MONTH, month);
+        calendar.set(Calendar.DAY_OF_MONTH, day);
+        return calendar;
+    }
 
-        int day = Integer.parseInt(dateString.substring(0, 2));
-        int month = Integer.parseInt(dateString.substring(3, 5)) - 1;
-        int year = Integer.parseInt(dateString.substring(6, 10));
+    public boolean isDateValid(Calendar end, Calendar start, Calendar givenCalendar) {
+        return (isDayAfter(start, givenCalendar) || isSameDay(givenCalendar, start)) &&
+                (isDayAfter(givenCalendar, end) || isSameDay(givenCalendar, end));
+    }
 
-        Calendar givenCalendar = Calendar.getInstance();
-        givenCalendar.set(Calendar.YEAR, year);
-        givenCalendar.set(Calendar.MONTH, month);
-        givenCalendar.set(Calendar.DAY_OF_MONTH, day);
-
-        return (givenCalendar.after(start) || isSameDay(givenCalendar, start)) &&
-                (givenCalendar.before(end) || isSameDay(givenCalendar, end));
-
-
+    public static boolean isDayAfter(Calendar calendar1, Calendar calendar2) {
+        return (calendar1.get(Calendar.YEAR) < calendar2.get(Calendar.YEAR) ||
+                (calendar1.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR) && calendar1.get(Calendar.MONTH) < calendar2.get(Calendar.MONTH)) ||
+                (calendar1.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR) && calendar1.get(Calendar.MONTH) == calendar2.get(Calendar.MONTH) &&
+                        calendar1.get(Calendar.DAY_OF_MONTH) < calendar2.get(Calendar.DAY_OF_MONTH)));
     }
 
     public static boolean isSameDay(Calendar calendar1, Calendar calendar2) {
-        return calendar1.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR) &&
+        return (calendar1.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR) &&
                 calendar1.get(Calendar.MONTH) == calendar2.get(Calendar.MONTH) &&
-                calendar1.get(Calendar.DAY_OF_MONTH) == calendar2.get(Calendar.DAY_OF_MONTH);
+                calendar1.get(Calendar.DAY_OF_MONTH) == calendar2.get(Calendar.DAY_OF_MONTH));
     }
-
-
-
 
     @Override
     public boolean onSupportNavigateUp() {
@@ -211,14 +243,8 @@ public class AccountDetailActivity extends AppCompatActivity {
         EditText editDescription = findViewById(R.id.edit_transaction_description);
         EditText editAmount = findViewById(R.id.edit_transaction_amount);
         RadioGroup radioGroupType = findViewById(R.id.transaction_type_radio_group);
+        Spinner editCategory = findViewById(R.id.edit_category_spinner);
         final String[] selectedTransactionType = {""};
-        editDate = findViewById(R.id.edit_date);
-        editDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDatePickerDialog();
-            }
-        });
 
         Button btnSave = findViewById(R.id.btn_transaction_save);
         Button btnCancel = findViewById(R.id.btn_transaction_cancel);
@@ -238,39 +264,46 @@ public class AccountDetailActivity extends AppCompatActivity {
                 String type = selectedTransactionType[0].trim();
                 String date = editDate.getText().toString().trim();
                 String description = editDescription.getText().toString().trim();
+                String category = String.valueOf(editCategory.getSelectedItem());
                 String tAccountId = accountId;
                 String tAccountTitle = accountTitle;
 
-                if(TextUtils.isEmpty(description)){
-                    editDate.setError("Description is required!!");
-                }
-                if(TextUtils.isEmpty(amount)){
-                    editAmount.setError("Amount is required!!");
-                    return;
-                }
-                if(TextUtils.isEmpty(date)){
-                    editDate.setError("Date is required!!");
-                }
-                double dAmount = Double.parseDouble(amount);
                 int selectedId = radioGroupType.getCheckedRadioButtonId();
-                if (selectedId == -1) {
-                    Toast.makeText(AccountDetailActivity.this, "Type is required!!", Toast.LENGTH_SHORT).show();
+                if(TextUtils.isEmpty(description)){
+                    Toast.makeText(AccountDetailActivity.this, "Description is required!!", Toast.LENGTH_SHORT).show();
+                }
+                else if (TextUtils.isEmpty(category) || Objects.equals(category, "Select Category")) {
+                    Toast.makeText(AccountDetailActivity.this, "Category is required!!", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
-
-                String id = mTransactionDatabase.push().getKey();
-                Transaction tData = new Transaction(dAmount, description, id,date, type, tAccountId, tAccountTitle);
-                mTransactionDatabase.child(id).setValue(tData).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            updateAccountBalance(dAmount, type);
-                        } else {
-                            Toast.makeText(AccountDetailActivity.this, "Failed to save transaction data", Toast.LENGTH_SHORT).show();
+                else if(TextUtils.isEmpty(amount)){
+                    Toast.makeText(AccountDetailActivity.this, "Amount is required!!", Toast.LENGTH_SHORT).show();
+                }
+                else if(TextUtils.isEmpty(date)){
+                    Toast.makeText(AccountDetailActivity.this, "Date is required!!", Toast.LENGTH_SHORT).show();
+                }
+                else if (selectedId == -1)  {
+                    Toast.makeText(AccountDetailActivity.this, "Type is required!!", Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    double dAmount = Double.parseDouble(amount);
+                    String id = mTransactionDatabase.push().getKey();
+                    Transaction tData = new Transaction(dAmount, description, id,date, type, tAccountId, tAccountTitle, category);
+                    mTransactionDatabase.child(id).setValue(tData).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                updateAccountBalance(dAmount, type);
+                                Intent intent = new Intent(v.getContext(), AccountDetailActivity.class);
+                                intent.putExtra("ACCOUNT_ID", accountId);
+                                intent.putExtra("CURRENCY_TYPE", currencyType);
+                                v.getContext().startActivity(intent);
+                            } else {
+                                Toast.makeText(AccountDetailActivity.this, "Failed to save transaction data", Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    }
-                });
+                    });
+                }
 
             }
         });
@@ -282,6 +315,36 @@ public class AccountDetailActivity extends AppCompatActivity {
             }
         });
     }
+
+    public void GenerateReport() {
+        Button btnGenerate = findViewById(R.id.btn_generate_report);
+        btnGenerate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String startDate = editReportStartDate.getText().toString().trim();
+                String endDate = editReportEndDate.getText().toString().trim();
+
+                if(TextUtils.isEmpty(startDate)){
+                    Toast.makeText(AccountDetailActivity.this, "Start date is required!!", Toast.LENGTH_SHORT).show();
+                }
+                else if(TextUtils.isEmpty(endDate)){
+                    Toast.makeText(AccountDetailActivity.this, "End date is required!!", Toast.LENGTH_SHORT).show();
+                }
+                else if(convertDateString(startDate).after(convertDateString(endDate)) || isSameDay(convertDateString(startDate), convertDateString(endDate))){
+                    Toast.makeText(AccountDetailActivity.this, "Invalid Date range!!", Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    Intent intent = new Intent(v.getContext(), GenerateReportActivity.class);
+                    intent.putExtra("ACCOUNT_ID", accountId);
+                    intent.putExtra("START_DATE", startDate);
+                    intent.putExtra("END_DATE", endDate);
+                    intent.putExtra("CURRENCY_TYPE", currencyType);
+                    v.getContext().startActivity(intent);
+                }
+            }
+        });
+    }
+
 
     public void updateAccountBalance(double transactionAmount, String transactionType) {
         double newAmount = accountBalance;
@@ -305,7 +368,7 @@ public class AccountDetailActivity extends AppCompatActivity {
         });
     }
 
-    private void showDatePickerDialog() {
+    private void showDatePickerDialog1() {
         final Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
@@ -319,6 +382,48 @@ public class AccountDetailActivity extends AppCompatActivity {
                         if (editDate != null) {
                             String dateText = dayOfMonth + "/" + (month + 1) + "/" + year;
                             editDate.setText(dateText);
+                        }
+                    }
+                },
+                year, month, day);
+        datePickerDialog.show();
+    }
+
+    private void showDatePickerDialog2() {
+        final Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                this,
+                new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                        if (editReportStartDate != null) {
+                            String dateText = dayOfMonth + "/" + (month + 1) + "/" + year;
+                            editReportStartDate.setText(dateText);
+                        }
+                    }
+                },
+                year, month, day);
+        datePickerDialog.show();
+    }
+
+    private void showDatePickerDialog3() {
+        final Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                this,
+                new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                        if (editReportEndDate != null) {
+                            String dateText = dayOfMonth + "/" + (month + 1) + "/" + year;
+                            editReportEndDate.setText(dateText);
                         }
                     }
                 },

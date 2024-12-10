@@ -29,10 +29,10 @@
     <View
         android:id="@+id/account_info_card"
         android:layout_width="match_parent"
-        android:layout_height="160dp"
+        android:layout_height="150dp"
         android:layout_marginStart="12dp"
         android:layout_marginEnd="12dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:background="@drawable/account_info_card_background"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar" />
@@ -151,15 +151,96 @@
 
 
     <View
-        android:id="@+id/add_transaction_card"
+        android:id="@+id/generate_report_card"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_marginTop="20dp"
+        android:layout_height="140dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="15dp"
         android:layout_marginStart="15dp"
         android:background="@drawable/add_transaction_card_background"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/account_info_card"/>
+
+    <TextView
+        android:id="@+id/generate_report_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="GENERATE REPORT"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:textColor="@color/bluish_purple"
+        android:layout_marginTop="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/generate_report_card"/>
+
+    <EditText
+        android:id="@+id/edit_report_start_date"
+        android:layout_width="150dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="7dp"
+        android:background="@drawable/white_rounded_rectangle_bg"
+        android:hint="Start date"
+        android:textColor="@color/blue"
+        android:textColorHint="@color/blue"
+        android:textAlignment="center"
+        android:textSize="15sp"
+        android:inputType="date"
+        android:clickable="true"
+        android:drawableStart="@drawable/edit_calendar_icon"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:padding="7dp"
+        app:layout_constraintStart_toStartOf="@+id/generate_report_card"
+        app:layout_constraintTop_toBottomOf="@+id/generate_report_title"
+        tools:ignore="HardcodedText" />
+
+    <EditText
+        android:id="@+id/edit_report_end_date"
+        android:layout_width="150dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="7dp"
+        android:background="@drawable/white_rounded_rectangle_bg"
+        android:hint="End date"
+        android:textColor="@color/blue"
+        android:textColorHint="@color/blue"
+        android:textAlignment="center"
+        android:textSize="15sp"
+        android:inputType="date"
+        android:clickable="true"
+        android:drawableStart="@drawable/edit_calendar_icon"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:padding="7dp"
+        app:layout_constraintEnd_toEndOf="@+id/generate_report_card"
+        app:layout_constraintTop_toBottomOf="@+id/generate_report_title"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/btn_generate_report"
+        android:layout_width="110dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:backgroundTint="@color/blue"
+        android:text="Generate"
+        android:textAppearance="?android:textAppearanceSmall"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/edit_report_start_date"
+        tools:ignore="HardcodedText" />
+
+    <View
+        android:id="@+id/add_transaction_card"
+        android:layout_width="match_parent"
+        android:layout_height="320dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/add_transaction_card_background"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/generate_report_card" />
 
     <TextView
         android:id="@+id/add_transaction_title"
@@ -169,7 +250,7 @@
         android:textStyle="bold"
         android:textSize="18sp"
         android:textColor="@color/bluish_purple"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="7dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/add_transaction_card"/>
@@ -180,7 +261,7 @@
         android:layout_height="40dp"
         android:layout_marginStart="35dp"
         android:layout_marginEnd="35dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="7dp"
         android:background="@drawable/white_rounded_rectangle_bg"
         android:hint="Description"
         android:textColor="@color/blue"
@@ -197,13 +278,29 @@
         app:layout_constraintTop_toBottomOf="@+id/add_transaction_title"
         tools:ignore="HardcodedText" />
 
+    <Spinner
+        android:id="@+id/edit_category_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginStart="35dp"
+        android:layout_marginEnd="35dp"
+        android:textAlignment="center"
+        android:textColorHint="@color/blue"
+        android:textColor="@color/blue"
+        android:entries="@array/CategoriesArray"
+        android:background="@drawable/white_rounded_rectangle_bg"
+        app:layout_constraintStart_toEndOf="@+id/add_transaction_card"
+        app:layout_constraintEnd_toEndOf="@+id/add_transaction_card"
+        app:layout_constraintTop_toBottomOf="@+id/edit_transaction_description"/>
+
     <EditText
         android:id="@+id/edit_transaction_amount"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_marginStart="35dp"
         android:layout_marginEnd="35dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="7dp"
         android:background="@drawable/white_rounded_rectangle_bg"
         android:hint="Amount"
         android:textColor="@color/blue"
@@ -217,7 +314,7 @@
         android:padding="7dp"
         app:layout_constraintStart_toEndOf="@+id/add_transaction_card"
         app:layout_constraintEnd_toEndOf="@+id/add_transaction_card"
-        app:layout_constraintTop_toBottomOf="@id/edit_transaction_description"
+        app:layout_constraintTop_toBottomOf="@id/edit_category_spinner"
         tools:ignore="HardcodedText" />
 
     <EditText
@@ -226,7 +323,7 @@
         android:layout_height="40dp"
         android:layout_marginStart="35dp"
         android:layout_marginEnd="35dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="7dp"
         android:background="@drawable/white_rounded_rectangle_bg"
         android:hint="Date"
         android:textColor="@color/blue"
@@ -275,11 +372,10 @@
         android:id="@+id/btn_transaction_cancel"
         android:layout_width="120dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
         android:layout_marginStart="35dp"
         android:backgroundTint="@color/red"
         android:text="Cancel"
-        android:textAppearance="?android:textAppearanceMedium"
+        android:textAppearance="?android:textAppearanceSmall"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/transaction_type_radio_group"
         tools:ignore="HardcodedText" />
@@ -288,11 +384,10 @@
         android:id="@+id/btn_transaction_save"
         android:layout_width="120dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
         android:layout_marginEnd="35dp"
         android:backgroundTint="@color/green"
         android:text="Save"
-        android:textAppearance="?android:textAppearanceMedium"
+        android:textAppearance="?android:textAppearanceSmall"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/transaction_type_radio_group"
         tools:ignore="HardcodedText" />

@@ -28,7 +28,7 @@
     <View
         android:id="@+id/add_transaction_card"
         android:layout_width="match_parent"
-        android:layout_height="380dp"
+        android:layout_height="410dp"
         android:layout_marginTop="30dp"
         android:layout_marginEnd="15dp"
         android:layout_marginStart="15dp"
@@ -87,6 +87,22 @@
         app:layout_constraintTop_toBottomOf="@+id/account_spinner"
         tools:ignore="HardcodedText" />
 
+    <Spinner
+        android:id="@+id/edit_category_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginStart="35dp"
+        android:layout_marginEnd="35dp"
+        android:textAlignment="center"
+        android:textColorHint="@color/blue"
+        android:textColor="@color/blue"
+        android:entries="@array/CategoriesArray"
+        android:background="@drawable/white_rounded_rectangle_bg"
+        app:layout_constraintStart_toEndOf="@+id/add_transaction_card"
+        app:layout_constraintEnd_toEndOf="@+id/add_transaction_card"
+        app:layout_constraintTop_toBottomOf="@+id/edit_transaction_description"/>
+
     <EditText
         android:id="@+id/edit_transaction_amount"
         android:layout_width="match_parent"
@@ -107,7 +123,7 @@
         android:padding="7dp"
         app:layout_constraintStart_toEndOf="@+id/add_transaction_card"
         app:layout_constraintEnd_toEndOf="@+id/add_transaction_card"
-        app:layout_constraintTop_toBottomOf="@id/edit_transaction_description"
+        app:layout_constraintTop_toBottomOf="@+id/edit_category_spinner"
         tools:ignore="HardcodedText" />
 
     <EditText

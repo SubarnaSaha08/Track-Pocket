@@ -17,6 +17,9 @@
         android:theme="@style/Base.Theme.TrackPocket"
         tools:targetApi="31">
         <activity
+            android:name=".GenerateReportActivity"
+            android:exported="false" />
+        <activity
             android:name=".SaveScannedBillActivity"
             android:exported="false" />
         <activity
